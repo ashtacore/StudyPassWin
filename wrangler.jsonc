@@ -1,0 +1,8 @@
+{
+  "name": "studypasswin",
+  "compatibility_date": "2025-09-07",
+  "assets": {
+    "directory": "./build",
+    "not_found_handling": "single-page-application"
+  }
+}
