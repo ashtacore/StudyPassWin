@@ -10,19 +10,19 @@ export function AdminPanel() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Panel</h1>
-        <p className="text-gray-600">Manage flashcard sets and user assignments</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Admin Panel</h1>
+        <p className="text-gray-600 dark:text-gray-300">Manage flashcard sets and user assignments</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="border-b border-gray-200 dark:border-gray-700">
           <div className="flex">
             <button
               onClick={() => setActiveTab("upload")}
               className={`px-6 py-4 font-medium transition-colors ${
                 activeTab === "upload"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               Upload Flashcard Set
@@ -31,8 +31,8 @@ export function AdminPanel() {
               onClick={() => setActiveTab("assign")}
               className={`px-6 py-4 font-medium transition-colors ${
                 activeTab === "assign"
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               Assign Sets to Users
@@ -113,44 +113,44 @@ function UploadTab() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-900">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-900 dark:text-blue-300">
           <span className="font-semibold">CSV Format:</span> The first row should be headers. Each subsequent row should have: Question, Answer, Hint (optional)
         </p>
-        <p className="text-sm text-blue-900 mt-2">
-          Example: <code className="bg-blue-100 px-1 rounded">What is 2+2?, 4, Think about basic addition</code>
+        <p className="text-sm text-blue-900 dark:text-blue-300 mt-2">
+          Example: <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">What is 2+2?, 4, Think about basic addition</code>
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Set Name
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             placeholder="e.g., Spanish Vocabulary - Level 1"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Description
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             placeholder="Brief description of this flashcard set"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Upload CSV File
           </label>
           <input
@@ -158,14 +158,14 @@ function UploadTab() {
             type="file"
             accept=".csv"
             onChange={handleFileUpload}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
 
         <button
           type="submit"
           disabled={isUploading}
-          className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
+          className="w-full px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium disabled:opacity-50"
         >
           {isUploading ? "Creating..." : "Create Flashcard Set"}
         </button>
@@ -210,7 +210,7 @@ function AssignTab() {
   if (allSets === undefined || allUsers === undefined) {
     return (
       <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
       </div>
     );
   }
@@ -220,13 +220,13 @@ function AssignTab() {
   return (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Select Flashcard Set
         </label>
         <select
           value={selectedSet || ""}
           onChange={(e) => setSelectedSet(e.target.value as Id<"flashcardSets"> || null)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         >
           <option value="">-- Select a set --</option>
           {allSets.map((set) => (
@@ -239,10 +239,10 @@ function AssignTab() {
 
       {selectedSet && (
         <div className="space-y-4">
-          <h3 className="font-semibold text-gray-900">Assign to Users</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">Assign to Users</h3>
           
           {allUsers.length === 0 ? (
-            <p className="text-gray-600 text-sm">No users found</p>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">No users found</p>
           ) : (
             <div className="space-y-2">
               {allUsers.map((user) => {
@@ -250,23 +250,23 @@ function AssignTab() {
                 return (
                   <div
                     key={user._id}
-                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                    className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
                   >
                     <div>
-                      <p className="font-medium text-gray-900">{user.email}</p>
-                      {user.name && <p className="text-sm text-gray-600">{user.name}</p>}
+                      <p className="font-medium text-gray-900 dark:text-white">{user.email}</p>
+                      {user.name && <p className="text-sm text-gray-600 dark:text-gray-400">{user.name}</p>}
                     </div>
                     {isAssigned ? (
                       <button
                         onClick={() => handleRemove(user._id)}
-                        className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                        className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm font-medium"
                       >
                         Remove
                       </button>
                     ) : (
                       <button
                         onClick={() => handleAssign(user._id)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                        className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium"
                       >
                         Assign
                       </button>

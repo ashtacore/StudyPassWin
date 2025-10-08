@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { Dashboard } from "./Dashboard";
 import { AdminPanel } from "./AdminPanel";
 import { FlashcardReview } from "./FlashcardReview";
+import { DarkModeToggle } from "./DarkModeToggle";
 import { useState } from "react";
 import { Id } from "../convex/_generated/dataModel";
 
@@ -25,15 +26,15 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm h-16 flex justify-between items-center border-b shadow-sm px-4">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors">
+      <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm h-16 flex justify-between items-center border-b dark:border-gray-700 shadow-sm px-4">
         <div className="flex items-center gap-4">
-          <h2 className="text-xl font-semibold text-primary">Flashcard Review</h2>
+          <h2 className="text-xl font-semibold text-primary dark:text-blue-400">Flashcard Review</h2>
           <Authenticated>
             {isAdmin && currentView !== "dashboard" && (
               <button
                 onClick={handleBackToDashboard}
-                className="text-sm text-gray-600 hover:text-gray-900"
+                className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               >
                 ← Back to Dashboard
               </button>
@@ -41,6 +42,7 @@ export default function App() {
           </Authenticated>
         </div>
         <div className="flex items-center gap-4">
+          <DarkModeToggle />
           <Authenticated>
             {isAdmin && currentView === "dashboard" && (
               <button
@@ -91,7 +93,7 @@ function Content({
   if (loggedInUser === undefined) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
       </div>
     );
   }
@@ -108,8 +110,8 @@ function Content({
       <Unauthenticated>
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to Flashcard Review</h1>
-            <p className="text-lg text-gray-600">Sign in to start reviewing your flashcards</p>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Welcome to Flashcard Review</h1>
+            <p className="text-lg text-gray-600 dark:text-gray-300">Sign in to start reviewing your flashcards</p>
           </div>
           <SignInForm />
         </div>
