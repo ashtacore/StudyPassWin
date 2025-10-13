@@ -68,8 +68,8 @@ export function Dashboard({ onStartReview }: { onStartReview: (setId: Id<"flashc
 
             <div className="mb-4">
               <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-2">
-                <span>Progress</span>
-                <span>{set.reviewedCards} / {set.totalCards} cards</span>
+                <span>Mastered</span>
+                <span>{set.masteredCards} / {set.totalCards} cards</span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                 <div
@@ -82,6 +82,8 @@ export function Dashboard({ onStartReview }: { onStartReview: (setId: Id<"flashc
             <div className="flex items-center justify-between mb-4 text-sm">
               <div className="flex items-center gap-2">
                 <span className="text-green-600 dark:text-green-400 font-medium">✓ {set.correctCards}</span>
+                <span className="text-gray-400 dark:text-gray-500">|</span>
+                <span className="text-red-600 dark:text-red-400 font-medium">✗ {set.incorrectCards}</span>
                 <span className="text-gray-400 dark:text-gray-500">|</span>
                 <span className="text-gray-600 dark:text-gray-300">{set.totalCards} total</span>
               </div>

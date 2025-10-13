@@ -23,14 +23,14 @@ export function FlashcardReview({
   const flashcards = useQuery(api.flashcards.getFlashcards, { setId });
   const recordAnswer = useMutation(api.flashcards.recordAnswer);
   
-  // Reorder flashcards: shuffle incomplete cards, place completed ones at the end
+  // Reorder flashcards: shuffle non-mastered cards, place mastered ones at the end
   const orderedFlashcards = useMemo(() => {
     if (!flashcards) return [];
     
-    const incomplete = flashcards.filter(card => !card.hasBeenReviewed || card.lastResult === false);
-    const completed = flashcards.filter(card => card.hasBeenReviewed && card.lastResult === true);
+    const notMastered = flashcards.filter(card => !card.isMastered);
+    const mastered = flashcards.filter(card => card.isMastered);
     
-    return [...shuffleArray(incomplete), ...completed];
+    return [...shuffleArray(notMastered), ...mastered];
   }, [flashcards]);
   
   const [currentIndex, setCurrentIndex] = useState(0);

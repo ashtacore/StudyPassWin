@@ -46,8 +46,37 @@ export const getAssignedSets = query({
           )
           .collect();
         
-        const correctCount = progress.filter(p => p.correct).length;
-        const reviewedCount = new Set(progress.map(p => p.cardId)).size;
+        // Calculate stats per card using n+1 rule
+        const cardStats = new Map<string, { correct: number; incorrect: number; isMastered: boolean }>();
+        
+        for (const p of progress) {
+          const cardId = p.cardId;
+          if (!cardStats.has(cardId)) {
+            cardStats.set(cardId, { correct: 0, incorrect: 0, isMastered: false });
+          }
+          const stats = cardStats.get(cardId)!;
+          if (p.correct) {
+            stats.correct++;
+          } else {
+            stats.incorrect++;
+          }
+        }
+        
+        // A card is mastered if correct >= incorrect + 1
+        let masteredCount = 0;
+        let totalCorrect = 0;
+        let totalIncorrect = 0;
+        
+        for (const stats of cardStats.values()) {
+          totalCorrect += stats.correct;
+          totalIncorrect += stats.incorrect;
+          if (stats.correct >= stats.incorrect + 1) {
+            stats.isMastered = true;
+            masteredCount++;
+          }
+        }
+        
+        const reviewedCount = cardStats.size;
         
         return {
           _id: set._id,
@@ -55,8 +84,10 @@ export const getAssignedSets = query({
           description: set.description,
           totalCards: totalCards.length,
           reviewedCards: reviewedCount,
-          correctCards: correctCount,
-          progress: totalCards.length > 0 ? (reviewedCount / totalCards.length) * 100 : 0,
+          correctCards: totalCorrect,
+          incorrectCards: totalIncorrect,
+          masteredCards: masteredCount,
+          progress: totalCards.length > 0 ? (masteredCount / totalCards.length) * 100 : 0,
         };
       })
     );
@@ -98,10 +129,20 @@ export const getFlashcards = query({
           )
           .collect();
         
+        // Calculate correct and incorrect counts
+        const correctCount = progress.filter(p => p.correct).length;
+        const incorrectCount = progress.filter(p => !p.correct).length;
+        
+        // A card is mastered if correct >= incorrect + 1
+        const isMastered = correctCount >= incorrectCount + 1;
+        
         return {
           ...card,
           hasBeenReviewed: progress.length > 0,
           lastResult: progress.length > 0 ? progress[progress.length - 1].correct : null,
+          isMastered,
+          correctCount,
+          incorrectCount,
         };
       })
     );
