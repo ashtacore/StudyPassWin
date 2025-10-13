@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Id } from "../convex/_generated/dataModel";
 
 export function AdminPanel() {
-  const [activeTab, setActiveTab] = useState<"upload" | "assign" | "edit">("upload");
+  const [activeTab, setActiveTab] = useState<"upload" | "assign" | "edit" | "progress">("upload");
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -47,6 +47,16 @@ export function AdminPanel() {
             >
               Assign Sets to Users
             </button>
+            <button
+              onClick={() => setActiveTab("progress")}
+              className={`px-6 py-4 font-medium transition-colors ${
+                activeTab === "progress"
+                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              User Progress
+            </button>
           </div>
         </div>
 
@@ -54,6 +64,7 @@ export function AdminPanel() {
           {activeTab === "upload" && <UploadTab />}
           {activeTab === "edit" && <EditTab />}
           {activeTab === "assign" && <AssignTab />}
+          {activeTab === "progress" && <ProgressTab />}
         </div>
       </div>
     </div>
@@ -431,6 +442,117 @@ function EditTab() {
           </button>
         </form>
       )}
+    </div>
+  );
+}
+
+function ProgressTab() {
+  const userProgress = useQuery(api.flashcards.getAllUserProgress);
+
+  if (userProgress === undefined) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
+      </div>
+    );
+  }
+
+  if (userProgress.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600 dark:text-gray-400">No users found</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {userProgress.map((user) => (
+        <div
+          key={user.userId}
+          className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+        >
+          <div className="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {user.email}
+            </h3>
+            {user.name && (
+              <p className="text-sm text-gray-600 dark:text-gray-400">{user.name}</p>
+            )}
+          </div>
+
+          {user.sets.length === 0 ? (
+            <div className="px-6 py-8 text-center">
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                No flashcard sets assigned to this user
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              {user.sets.map((set) => (
+                <div
+                  key={set.setId}
+                  className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium text-gray-900 dark:text-white">
+                      {set.setName}
+                    </h4>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {set.reviewedCards} / {set.totalCards} cards reviewed
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                      <div className="text-green-700 dark:text-green-400 font-medium mb-1">
+                        Correct Answers
+                      </div>
+                      <div className="text-2xl font-bold text-green-900 dark:text-green-300">
+                        {set.correctCount}
+                      </div>
+                    </div>
+
+                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                      <div className="text-red-700 dark:text-red-400 font-medium mb-1">
+                        Incorrect Answers
+                      </div>
+                      <div className="text-2xl font-bold text-red-900 dark:text-red-300">
+                        {set.incorrectCount}
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                      <div className="text-blue-700 dark:text-blue-400 font-medium mb-1">
+                        Mastered Cards
+                      </div>
+                      <div className="text-2xl font-bold text-blue-900 dark:text-blue-300">
+                        {set.masteredCards}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all"
+                        style={{ 
+                          width: `${set.totalCards > 0 ? (set.masteredCards / set.totalCards) * 100 : 0}%` 
+                        }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      {set.totalCards > 0 
+                        ? `${Math.round((set.masteredCards / set.totalCards) * 100)}% mastered`
+                        : '0% mastered'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

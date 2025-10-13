@@ -468,3 +468,90 @@ export const getSetAssignments = query({
     return usersWithAssignments;
   },
 });
+
+// Admin: Get all user progress statistics
+export const getAllUserProgress = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getLoggedInUser(ctx);
+    const admin = await isAdmin(ctx, userId);
+    
+    if (!admin) {
+      throw new Error("Admin access required");
+    }
+    
+    const users = await ctx.db.query("users").collect();
+    
+    const userProgressData = await Promise.all(
+      users.map(async (user) => {
+        const assignments = await ctx.db
+          .query("userSetAssignments")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .collect();
+        
+        const setsProgress = await Promise.all(
+          assignments.map(async (assignment) => {
+            const set = await ctx.db.get(assignment.setId);
+            if (!set) return null;
+            
+            const progress = await ctx.db
+              .query("userProgress")
+              .withIndex("by_user_and_set", (q) => 
+                q.eq("userId", user._id).eq("setId", assignment.setId)
+              )
+              .collect();
+            
+            const correctCount = progress.filter(p => p.correct).length;
+            const incorrectCount = progress.filter(p => !p.correct).length;
+            
+            // Calculate mastered cards using n+1 rule
+            const cardStats = new Map<string, { correct: number; incorrect: number }>();
+            for (const p of progress) {
+              const cardId = p.cardId;
+              if (!cardStats.has(cardId)) {
+                cardStats.set(cardId, { correct: 0, incorrect: 0 });
+              }
+              const stats = cardStats.get(cardId)!;
+              if (p.correct) {
+                stats.correct++;
+              } else {
+                stats.incorrect++;
+              }
+            }
+            
+            let masteredCards = 0;
+            for (const stats of cardStats.values()) {
+              if (stats.correct >= stats.incorrect + 1) {
+                masteredCards++;
+              }
+            }
+            
+            const totalCards = await ctx.db
+              .query("flashcards")
+              .withIndex("by_set", (q) => q.eq("setId", assignment.setId))
+              .collect();
+            
+            return {
+              setId: assignment.setId,
+              setName: set.name,
+              correctCount,
+              incorrectCount,
+              masteredCards,
+              totalCards: totalCards.length,
+              reviewedCards: cardStats.size,
+            };
+          })
+        );
+        
+        return {
+          userId: user._id,
+          email: user.email,
+          name: user.name,
+          sets: setsProgress.filter(s => s !== null),
+        };
+      })
+    );
+    
+    return userProgressData;
+  },
+});
