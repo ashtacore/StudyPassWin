@@ -1,7 +1,17 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+
+// Fisher-Yates shuffle algorithm
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 export function FlashcardReview({ 
   setId, 
@@ -12,6 +22,16 @@ export function FlashcardReview({
 }) {
   const flashcards = useQuery(api.flashcards.getFlashcards, { setId });
   const recordAnswer = useMutation(api.flashcards.recordAnswer);
+  
+  // Reorder flashcards: shuffle incomplete cards, place completed ones at the end
+  const orderedFlashcards = useMemo(() => {
+    if (!flashcards) return [];
+    
+    const incomplete = flashcards.filter(card => !card.hasBeenReviewed || card.lastResult === false);
+    const completed = flashcards.filter(card => card.hasBeenReviewed && card.lastResult === true);
+    
+    return [...shuffleArray(incomplete), ...completed];
+  }, [flashcards]);
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showHint, setShowHint] = useState(false);
@@ -26,7 +46,7 @@ export function FlashcardReview({
     );
   }
 
-  if (flashcards.length === 0) {
+  if (orderedFlashcards.length === 0) {
     return (
       <div className="max-w-2xl mx-auto">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 text-center">
@@ -43,8 +63,8 @@ export function FlashcardReview({
     );
   }
 
-  const currentCard = flashcards[currentIndex];
-  const isLastCard = currentIndex === flashcards.length - 1;
+  const currentCard = orderedFlashcards[currentIndex];
+  const isLastCard = currentIndex === orderedFlashcards.length - 1;
 
   const handleAnswer = async (correct: boolean) => {
     setIsSubmitting(true);
@@ -83,7 +103,7 @@ export function FlashcardReview({
           ← Back to Dashboard
         </button>
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          Card {currentIndex + 1} of {flashcards.length}
+          Card {currentIndex + 1} of {orderedFlashcards.length}
         </div>
       </div>
 
@@ -92,7 +112,7 @@ export function FlashcardReview({
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
             <div
               className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all"
-              style={{ width: `${((currentIndex + 1) / flashcards.length) * 100}%` }}
+              style={{ width: `${((currentIndex + 1) / orderedFlashcards.length) * 100}%` }}
             ></div>
           </div>
         </div>
