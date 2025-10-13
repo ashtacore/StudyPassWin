@@ -339,6 +339,30 @@ export const createFlashcardSet = mutation({
   },
 });
 
+// Admin: Update flashcard set name and description
+export const updateFlashcardSet = mutation({
+  args: {
+    setId: v.id("flashcardSets"),
+    name: v.string(),
+    description: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getLoggedInUser(ctx);
+    const admin = await isAdmin(ctx, userId);
+    
+    if (!admin) {
+      throw new Error("Admin access required");
+    }
+    
+    await ctx.db.patch(args.setId, {
+      name: args.name,
+      description: args.description,
+    });
+    
+    return null;
+  },
+});
+
 // Admin: Assign set to user
 export const assignSetToUser = mutation({
   args: {

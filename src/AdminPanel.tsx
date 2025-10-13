@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Id } from "../convex/_generated/dataModel";
 
 export function AdminPanel() {
-  const [activeTab, setActiveTab] = useState<"upload" | "assign">("upload");
+  const [activeTab, setActiveTab] = useState<"upload" | "assign" | "edit">("upload");
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -28,6 +28,16 @@ export function AdminPanel() {
               Upload Flashcard Set
             </button>
             <button
+              onClick={() => setActiveTab("edit")}
+              className={`px-6 py-4 font-medium transition-colors ${
+                activeTab === "edit"
+                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+                  : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              Edit Sets
+            </button>
+            <button
               onClick={() => setActiveTab("assign")}
               className={`px-6 py-4 font-medium transition-colors ${
                 activeTab === "assign"
@@ -42,6 +52,7 @@ export function AdminPanel() {
 
         <div className="p-6">
           {activeTab === "upload" && <UploadTab />}
+          {activeTab === "edit" && <EditTab />}
           {activeTab === "assign" && <AssignTab />}
         </div>
       </div>
@@ -307,6 +318,118 @@ function AssignTab() {
             </div>
           )}
         </div>
+      )}
+    </div>
+  );
+}
+
+function EditTab() {
+  const allSets = useQuery(api.flashcards.getAllSets);
+  const [selectedSet, setSelectedSet] = useState<Id<"flashcardSets"> | null>(null);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const updateFlashcardSet = useMutation(api.flashcards.updateFlashcardSet);
+
+  const handleSelectSet = (setId: string) => {
+    const id = setId as Id<"flashcardSets">;
+    setSelectedSet(id || null);
+    
+    if (id && allSets) {
+      const set = allSets.find(s => s._id === id);
+      if (set) {
+        setName(set.name);
+        setDescription(set.description);
+      }
+    } else {
+      setName("");
+      setDescription("");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedSet || !name || !description) {
+      toast.error("Please select a set and fill in all fields");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await updateFlashcardSet({ setId: selectedSet, name, description });
+      toast.success("Flashcard set updated successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update flashcard set");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  if (allSets === undefined) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Select Flashcard Set to Edit
+        </label>
+        <select
+          value={selectedSet || ""}
+          onChange={(e) => handleSelectSet(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+        >
+          <option value="">-- Select a set to edit --</option>
+          {allSets.map((set) => (
+            <option key={set._id} value={set._id}>
+              {set.name} ({set.cardCount} cards)
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {selectedSet && (
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Set Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="e.g., Spanish Vocabulary - Level 1"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Description
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="Brief description of this flashcard set"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isUpdating}
+            className="w-full px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium disabled:opacity-50"
+          >
+            {isUpdating ? "Updating..." : "Update Flashcard Set"}
+          </button>
+        </form>
       )}
     </div>
   );

@@ -63,7 +63,7 @@ export function Dashboard({ onStartReview }: { onStartReview: (setId: Id<"flashc
           >
             <div className="mb-4">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{set.name}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{set.description}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">{set.description}</p>
             </div>
 
             <div className="mb-4">
