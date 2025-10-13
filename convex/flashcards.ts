@@ -143,6 +143,42 @@ export const recordAnswer = mutation({
   },
 });
 
+// Reset user's progress for a flashcard set
+export const resetProgress = mutation({
+  args: {
+    setId: v.id("flashcardSets"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getLoggedInUser(ctx);
+    
+    // Verify access
+    const assignment = await ctx.db
+      .query("userSetAssignments")
+      .withIndex("by_user_and_set", (q) => 
+        q.eq("userId", userId).eq("setId", args.setId)
+      )
+      .first();
+    
+    if (!assignment) {
+      throw new Error("You don't have access to this flashcard set");
+    }
+    
+    // Delete all progress records for this user and set
+    const progressRecords = await ctx.db
+      .query("userProgress")
+      .withIndex("by_user_and_set", (q) => 
+        q.eq("userId", userId).eq("setId", args.setId)
+      )
+      .collect();
+    
+    for (const record of progressRecords) {
+      await ctx.db.delete(record._id);
+    }
+    
+    return null;
+  },
+});
+
 // Admin: Get all flashcard sets
 export const getAllSets = query({
   args: {},

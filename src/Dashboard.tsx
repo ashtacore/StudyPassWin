@@ -1,9 +1,30 @@
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export function Dashboard({ onStartReview }: { onStartReview: (setId: Id<"flashcardSets">) => void }) {
   const assignedSets = useQuery(api.flashcards.getAssignedSets);
+  const resetProgress = useMutation(api.flashcards.resetProgress);
+  const [resettingSetId, setResettingSetId] = useState<Id<"flashcardSets"> | null>(null);
+
+  const handleResetProgress = async (setId: Id<"flashcardSets">, setName: string) => {
+    if (!confirm(`Are you sure you want to reset all progress for "${setName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setResettingSetId(setId);
+    try {
+      await resetProgress({ setId });
+      toast.success("Progress reset successfully!");
+    } catch (error) {
+      console.error("Error resetting progress:", error);
+      toast.error("Failed to reset progress. Please try again.");
+    } finally {
+      setResettingSetId(null);
+    }
+  };
 
   if (assignedSets === undefined) {
     return (
@@ -66,12 +87,24 @@ export function Dashboard({ onStartReview }: { onStartReview: (setId: Id<"flashc
               </div>
             </div>
 
-            <button
-              onClick={() => onStartReview(set._id)}
-              className="w-full px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium"
-            >
-              {set.reviewedCards === 0 ? "Start Review" : "Continue Review"}
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => onStartReview(set._id)}
+                className="w-full px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium"
+              >
+                {set.reviewedCards === 0 ? "Start Review" : "Continue Review"}
+              </button>
+              
+              {set.reviewedCards > 0 && (
+                <button
+                  onClick={() => handleResetProgress(set._id, set.name)}
+                  disabled={resettingSetId === set._id}
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors font-medium text-sm disabled:opacity-50"
+                >
+                  {resettingSetId === set._id ? "Resetting..." : "Reset Progress"}
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
