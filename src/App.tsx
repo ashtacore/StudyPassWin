@@ -27,27 +27,27 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors">
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm h-16 flex justify-between items-center border-b dark:border-gray-700 shadow-sm px-4">
-        <div className="flex items-center gap-4">
-          <h2 className="text-xl font-semibold text-primary dark:text-blue-400">Study, Pass, Win!</h2>
+      <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm min-h-16 flex flex-wrap justify-between items-center border-b dark:border-gray-700 shadow-sm px-4 py-3 gap-3">
+        <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+          <h2 className="text-lg md:text-xl font-semibold text-primary dark:text-blue-400">Study, Pass, Win!</h2>
           <Authenticated>
             {isAdmin && currentView !== "dashboard" && (
               <button
                 onClick={handleBackToDashboard}
-                className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                className="text-xs md:text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white whitespace-nowrap"
               >
                 ← Back to Dashboard
               </button>
             )}
           </Authenticated>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
           <DarkModeToggle />
           <Authenticated>
             {isAdmin && currentView === "dashboard" && (
               <button
                 onClick={() => setCurrentView("admin")}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                className="px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs md:text-sm font-medium whitespace-nowrap"
               >
                 Admin Panel
               </button>
@@ -55,7 +55,7 @@ export default function App() {
             {isAdmin && currentView === "admin" && (
               <button
                 onClick={() => setCurrentView("dashboard")}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+                className="px-3 md:px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-xs md:text-sm font-medium whitespace-nowrap"
               >
                 My Dashboard
               </button>
@@ -64,7 +64,7 @@ export default function App() {
           <SignOutButton />
         </div>
       </header>
-      <main className="flex-1 p-4 md:p-8">
+      <main className="flex-1 p-4 md:p-8 pt-4">
         <Content 
           currentView={currentView}
           selectedSetId={selectedSetId}
