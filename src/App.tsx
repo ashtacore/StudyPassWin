@@ -30,16 +30,6 @@ export default function App() {
       <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm min-h-16 flex flex-wrap justify-between items-center border-b dark:border-gray-700 shadow-sm px-4 py-3 gap-3">
         <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
           <h2 className="text-lg md:text-xl font-semibold text-primary dark:text-blue-400">Study, Pass, Win!</h2>
-          <Authenticated>
-            {isAdmin && currentView !== "dashboard" && (
-              <button
-                onClick={handleBackToDashboard}
-                className="text-xs md:text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white whitespace-nowrap"
-              >
-                ← Back to Dashboard
-              </button>
-            )}
-          </Authenticated>
         </div>
         <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
           <DarkModeToggle />
