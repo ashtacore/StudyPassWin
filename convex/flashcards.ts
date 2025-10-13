@@ -96,6 +96,29 @@ export const getAssignedSets = query({
   },
 });
 
+// Get flashcard set information
+export const getFlashcardSet = query({
+  args: { setId: v.id("flashcardSets") },
+  handler: async (ctx, args) => {
+    const userId = await getLoggedInUser(ctx);
+    
+    // Check if user has access to this set
+    const assignment = await ctx.db
+      .query("userSetAssignments")
+      .withIndex("by_user_and_set", (q) => 
+        q.eq("userId", userId).eq("setId", args.setId)
+      )
+      .first();
+    
+    if (!assignment) {
+      throw new Error("You don't have access to this flashcard set");
+    }
+    
+    const set = await ctx.db.get(args.setId);
+    return set;
+  },
+});
+
 // Get flashcards for a specific set
 export const getFlashcards = query({
   args: { setId: v.id("flashcardSets") },

@@ -20,6 +20,7 @@ export function FlashcardReview({
   setId: Id<"flashcardSets">; 
   onBack: () => void;
 }) {
+  const flashcardSet = useQuery(api.flashcards.getFlashcardSet, { setId });
   const flashcards = useQuery(api.flashcards.getFlashcards, { setId });
   const recordAnswer = useMutation(api.flashcards.recordAnswer);
   
@@ -126,6 +127,11 @@ export function FlashcardReview({
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 md:p-12">
         <div className="mb-8">
+          {flashcardSet && (
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+              {flashcardSet.name}
+            </h1>
+          )}
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
             <div
               className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all"
