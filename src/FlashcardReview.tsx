@@ -165,17 +165,33 @@ export function FlashcardReview({
           )}
 
           {!showAnswer ? (
-            <button
-              onClick={() => setShowAnswer(true)}
-              className="w-full md:w-auto px-8 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium text-lg"
-            >
-              Reveal Answer
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setShowAnswer(true)}
+                className="flex-1 sm:flex-initial px-8 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium text-lg"
+              >
+                Reveal Answer
+              </button>
+              <button
+                onClick={handleNext}
+                className="flex-1 sm:flex-initial px-8 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium text-lg"
+              >
+                Skip →
+              </button>
+            </div>
           ) : (
             <div className="space-y-6">
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
                 <p className="text-lg text-green-900 dark:text-green-300 font-medium mb-2">Answer:</p>
                 <p className="text-gray-900 dark:text-white">{currentCard.answer}</p>
+                
+                {currentCard.hint && (
+                  <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
+                    <p className="text-sm text-green-800 dark:text-green-400">
+                      <span className="font-semibold">Hint:</span> {currentCard.hint}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="border-t dark:border-gray-700 pt-6">
