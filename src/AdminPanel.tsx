@@ -67,6 +67,36 @@ function UploadTab() {
     }
   };
 
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = "";
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        // Handle escaped quotes ("")
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++; // Skip the next quote
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+    
+    // Add the last field
+    result.push(current.trim());
+    
+    return result;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -81,7 +111,7 @@ function UploadTab() {
       const cards = [];
 
       for (let i = 1; i < lines.length; i++) {
-        const parts = lines[i].split(",").map(p => p.trim().replace(/^"|"$/g, ""));
+        const parts = parseCSVLine(lines[i]);
         if (parts.length >= 2) {
           cards.push({
             question: parts[0],

@@ -29,7 +29,7 @@ export default function App() {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors">
       <header className="sticky top-0 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm h-16 flex justify-between items-center border-b dark:border-gray-700 shadow-sm px-4">
         <div className="flex items-center gap-4">
-          <h2 className="text-xl font-semibold text-primary dark:text-blue-400">Flashcard Review</h2>
+          <h2 className="text-xl font-semibold text-primary dark:text-blue-400">Study, Pass, Win!</h2>
           <Authenticated>
             {isAdmin && currentView !== "dashboard" && (
               <button
