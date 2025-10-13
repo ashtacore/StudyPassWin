@@ -37,6 +37,17 @@ export function FlashcardReview({
   const [showHint, setShowHint] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Reset UI state when card changes
+  const currentCardId = orderedFlashcards[currentIndex]?._id;
+  const [lastCardId, setLastCardId] = useState(currentCardId);
+  
+  if (currentCardId !== lastCardId) {
+    setShowHint(false);
+    setShowAnswer(false);
+    setIsSubmitting(false);
+    setLastCardId(currentCardId);
+  }
 
   if (flashcards === undefined) {
     return (
@@ -67,6 +78,9 @@ export function FlashcardReview({
   const isLastCard = currentIndex === orderedFlashcards.length - 1;
 
   const handleAnswer = async (correct: boolean) => {
+    // Prevent multiple submissions
+    if (isSubmitting) return;
+    
     setIsSubmitting(true);
     try {
       await recordAnswer({
@@ -84,6 +98,9 @@ export function FlashcardReview({
   };
 
   const handleNext = () => {
+    // Reset submitting state to ensure clean state for next card
+    setIsSubmitting(false);
+    
     if (!isLastCard) {
       setCurrentIndex(currentIndex + 1);
       setShowHint(false);
