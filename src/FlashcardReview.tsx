@@ -183,7 +183,10 @@ export function FlashcardReview({
             <div className="space-y-6">
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
                 <p className="text-lg text-green-900 dark:text-green-300 font-medium mb-2">Answer:</p>
-                <p className="text-gray-900 dark:text-white">{currentCard.answer}</p>
+                <div 
+                  className="text-gray-900 dark:text-white"
+                  dangerouslySetInnerHTML={{ __html: currentCard.answer }}
+                />
                 
                 {currentCard.hint && (
                   <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
