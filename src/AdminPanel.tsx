@@ -93,11 +93,27 @@ function UploadTab() {
     const result: string[] = [];
     let current = "";
     let inQuotes = false;
+    let escaped = false;
     
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
       
-      if (char === '"') {
+      if (char === '\\') {
+        escaped = true;
+        continue;
+      }
+
+      if (escaped) {
+        // New line
+        if (char === 'n') {
+          current += "<br><br>"
+        }
+        // Any escaped character
+        else {
+          current += char;
+        }
+        escaped = false;
+      } else if (char === '"') {
         // Handle escaped quotes ("")
         if (inQuotes && line[i + 1] === '"') {
           current += '"';
@@ -340,7 +356,9 @@ function EditTab() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const updateFlashcardSet = useMutation(api.flashcards.updateFlashcardSet);
+  const deleteFlashcardSet = useMutation(api.flashcards.deleteFlashcardSet);
 
   const handleSelectSet = (setId: string) => {
     const id = setId as Id<"flashcardSets">;
@@ -374,6 +392,30 @@ function EditTab() {
       toast.error(error.message || "Failed to update flashcard set");
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedSet) return;
+
+    const setToDelete = allSets?.find(s => s._id === selectedSet);
+    const setNameToDelete = setToDelete?.name || "this set";
+
+    if (!confirm(`Are you sure you want to delete "${setNameToDelete}"? This will permanently delete all flashcards, assignments, and user progress for this set. This action cannot be undone.`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteFlashcardSet({ setId: selectedSet });
+      toast.success("Flashcard set deleted successfully");
+      setSelectedSet(null);
+      setName("");
+      setDescription("");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete flashcard set");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -433,13 +475,23 @@ function EditTab() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={isUpdating}
-            className="w-full px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium disabled:opacity-50"
-          >
-            {isUpdating ? "Updating..." : "Update Flashcard Set"}
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              type="submit"
+              disabled={isUpdating || isDeleting}
+              className="flex-1 px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium disabled:opacity-50"
+            >
+              {isUpdating ? "Updating..." : "Update Flashcard Set"}
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isUpdating || isDeleting}
+              className="flex-1 sm:flex-initial px-6 py-3 bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors font-medium disabled:opacity-50"
+            >
+              {isDeleting ? "Deleting..." : "Delete Set"}
+            </button>
+          </div>
         </form>
       )}
     </div>

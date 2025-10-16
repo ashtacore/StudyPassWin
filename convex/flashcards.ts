@@ -363,6 +363,59 @@ export const updateFlashcardSet = mutation({
   },
 });
 
+// Admin: Delete flashcard set and all related data
+export const deleteFlashcardSet = mutation({
+  args: {
+    setId: v.id("flashcardSets"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getLoggedInUser(ctx);
+    const admin = await isAdmin(ctx, userId);
+    
+    if (!admin) {
+      throw new Error("Admin access required");
+    }
+    
+    // Delete all flashcards in the set
+    const flashcards = await ctx.db
+      .query("flashcards")
+      .withIndex("by_set", (q) => q.eq("setId", args.setId))
+      .collect();
+    
+    for (const card of flashcards) {
+      await ctx.db.delete(card._id);
+    }
+    
+    // Delete all user assignments
+    const assignments = await ctx.db
+      .query("userSetAssignments")
+      .withIndex("by_set", (q) => q.eq("setId", args.setId))
+      .collect();
+    
+    for (const assignment of assignments) {
+      await ctx.db.delete(assignment._id);
+    }
+    
+    // Delete all user progress records for this set (all users)
+    const allUsers = await ctx.db.query("users").collect();
+    for (const user of allUsers) {
+      const progressRecords = await ctx.db
+        .query("userProgress")
+        .withIndex("by_user_and_set", (q) => q.eq("userId", user._id).eq("setId", args.setId))
+        .collect();
+      
+      for (const progress of progressRecords) {
+        await ctx.db.delete(progress._id);
+      }
+    }
+    
+    // Finally, delete the set itself
+    await ctx.db.delete(args.setId);
+    
+    return null;
+  },
+});
+
 // Admin: Assign set to user
 export const assignSetToUser = mutation({
   args: {
